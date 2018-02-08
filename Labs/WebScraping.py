@@ -33,7 +33,7 @@ for text in articles:
 #Get the titles
 titles = []
 for title in texts:
-    titles.append(title.h1)
+    titles.append(title.h1.get_text())
     
 #Get the body of the news    
 bodies = []
