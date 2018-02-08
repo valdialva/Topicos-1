@@ -16,7 +16,7 @@ news  = soup.find_all('ul', ('class','article-block-big'))
 #Get the links from the news selected
 links = []
 
-for link in news.find_all('a'):
+for link in news[0].find_all('a'):
     links.append(link.get('href'))
 
 #Get the actual article links
@@ -40,5 +40,5 @@ bodies = []
 for body in texts:
     bodies.append(body.find_all('div', ('class','block-content')))
     
-print {titles}
+print (titles)
 print (bodies)
