@@ -19,6 +19,8 @@ links = []
 for link in news[0].find_all('a'):
     links.append(link.get('href'))
 
+links = set(links)
+
 #Get the actual article links
 articles = []
 
@@ -38,7 +40,7 @@ for title in texts:
 #Get the body of the news    
 bodies = []
 for body in texts:
-    bodies.append(body.find_all('div', ('class','block-content')))
+    bodies.append(body.find_all('div', ('class','block-content'))[0].find_all('p'))
     
 print (titles)
 print (bodies)
