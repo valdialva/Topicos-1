@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import nltk
 from nltk.tokenize import word_tokenize
-from nltk.corpus import state_union
-from nltk.tag import DefaultTagger, UnigramTagger, BigramTagger, TrigramTagger, NthOrderTagger
-from nltk.corpus import brown
+from nltk.corpus import state_union, brown
+from nltk.tag import DefaultTagger, UnigramTagger, BigramTagger, TrigramTagger, RegexpTagger, NgramTagger
+
 
 #1. Codigo para buscar palabras y frases espeficicas segun:
 #Palabras etiquetadas como MD
@@ -58,6 +58,54 @@ patterns = [
          (r'.*', 'NN')                      # nouns (default)
 ]
  
-NN_CD_Tagger = nltk.RegexpTagger(patterns)
-UT = UnigramTagger()
-NT = NgramTagger()
+NN_CD_Tagger = RegexpTagger(patterns)
+
+text = brown.tagged_sents()
+train_sents = text[:3000]
+test_sents = text[3000:]
+
+# Construct and train the taggers
+tagger1 = NgramTagger(2, train_sents)         # 1st order tagger
+tagger2 = UnigramTagger(train_sents)           # 0th order tagger
+
+#Evaluate taggers
+print (tagger1.evaluate(test_sents))
+print (tagger2.evaluate(test_sents))
+print (NN_CD_Tagger.evaluate(test_sents))
+
+# Combine the taggers
+def backoff_tagger(train_sents, tagger_classes, backoff = None):  
+    for cls in tagger_classes:    
+        backoff = cls(train_sents, backoff = backoff)
+    return backoff
+
+tag1 = backoff_tagger(train_sents, [UnigramTagger, BigramTagger], backoff = NN_CD_Tagger)
+print (tag1.evaluate(test_sents))
+tag2 = backoff_tagger(train_sents, [UnigramTagger, TrigramTagger], backoff = NN_CD_Tagger)
+print (tag2.evaluate(test_sents))
+tag3 = backoff_tagger(train_sents, [UnigramTagger, BigramTagger, TrigramTagger], backoff = NN_CD_Tagger)
+print (tag3.evaluate(test_sents))
+
+#Repeat with different size
+train_sents = text[:1000]
+test_sents = text[1000:2000]
+
+# Construct and train the taggers
+tagger1 = NgramTagger(2, train_sents)         # 1st order tagger
+tagger2 = UnigramTagger(train_sents)           # 0th order tagger
+
+#Evaluate taggers
+print (tagger1.evaluate(test_sents))
+print (tagger2.evaluate(test_sents))
+print (NN_CD_Tagger.evaluate(test_sents))
+
+tag1 = backoff_tagger(train_sents, [UnigramTagger, BigramTagger], backoff = NN_CD_Tagger)
+print (tag1.evaluate(test_sents))
+tag2 = backoff_tagger(train_sents, [UnigramTagger, TrigramTagger], backoff = NN_CD_Tagger)
+print (tag2.evaluate(test_sents))
+tag3 = backoff_tagger(train_sents, [UnigramTagger, BigramTagger, TrigramTagger], backoff = NN_CD_Tagger)
+print (tag3.evaluate(test_sents))
+
+'''
+Con mas datos la precision aumenta en todos los taggers excepto en NN_CD_tagger
+'''
